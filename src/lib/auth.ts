@@ -2,6 +2,8 @@ import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { db } from "@/index"
 import * as schema from "@/db/schema"
+import { eq } from "drizzle-orm"
+import { sendWelcomeEmail } from "./email"
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -23,6 +25,28 @@ export const auth = betterAuth({
       lastLoginAt: {
         type: "date",
         required: false,
+      },
+    },
+  },
+
+  databaseHooks: {
+    session: {
+      create: {
+        after: async (session) => {
+          try {
+            const [foundUser] = await db
+              .select()
+              .from(schema.user)
+              .where(eq(schema.user.id, session.userId))
+              .limit(1);
+
+            if (foundUser?.email) {
+              await sendWelcomeEmail(foundUser.email, foundUser.name || "");
+            }
+          } catch (e) {
+            console.error("Failed to send login email:", e);
+          }
+        },
       },
     },
   },
