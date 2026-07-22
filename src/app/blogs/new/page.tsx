@@ -1,6 +1,9 @@
 import { MarkdownEditor } from "@/components/blogs/MarkdownEditor";
+import { requireAuth } from "@/lib/auth-guard";
 
-export default function NewBlogPage() {
+export default async function NewBlogPage() {
+  await requireAuth();
+
   return (
     <div className="container max-w-5xl mx-auto py-8 px-4 h-screen flex flex-col">
       <div className="mb-8">

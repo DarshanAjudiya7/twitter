@@ -38,13 +38,22 @@ export async function getChannelMessages(channelId: string) {
   }
 }
 
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+
 export async function createMessageAction(channelId: string, content: string) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    const senderId = session?.user?.id || "usr_alice";
+
     const [msg] = await db
       .insert(schema.messages)
       .values({
         channelId,
-        senderId: "usr_alice",
+        senderId,
         content,
       })
       .returning();

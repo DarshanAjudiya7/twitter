@@ -76,6 +76,9 @@ export async function getBlogBySlug(slug: string) {
   }
 }
 
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+
 export async function createBlogAction(formData: {
   title: string;
   content: string;
@@ -83,6 +86,12 @@ export async function createBlogAction(formData: {
   coverImage?: string;
 }) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    const authorId = session?.user?.id || "usr_alice";
+
     const slug = formData.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -91,7 +100,7 @@ export async function createBlogAction(formData: {
     const [newBlog] = await db
       .insert(schema.blogs)
       .values({
-        authorId: "usr_alice", // Default active demo user
+        authorId,
         title: formData.title,
         slug,
         content: formData.content,
