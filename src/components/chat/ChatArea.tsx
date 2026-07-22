@@ -21,13 +21,21 @@ export function ChatArea({ channelId }: { channelId: string }) {
   useEffect(() => {
     // Connect to local Socket.IO server
     // For this to work seamlessly with our custom server.js, it's on the same port
-    socketRef.current = io(window.location.origin);
+    socketRef.current = io(window.location.origin, {
+      reconnection: false, // Don't loop network errors if server.js isn't running
+      timeout: 2000,
+      transports: ["websocket"] // Force WebSocket to prevent unhandled fetch NetworkErrors during polling
+    });
     
     const socket = socketRef.current;
 
     socket.on("connect", () => {
       console.log("Connected to socket server");
       socket.emit("join_channel", channelId);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.warn("Socket.IO connection failed. Make sure you are running 'node server.js' instead of 'npm run dev'.", err.message);
     });
 
     socket.on("new_message", (data: Message) => {
