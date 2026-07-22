@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import FloatingNavDemo from "@/components/floating-navbar-demo";
@@ -20,6 +20,8 @@ export const metadata: Metadata = {
   description: "A real-time community, publishing, profile, and discussion platform for developers.",
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className="dark">
@@ -28,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <FloatingNavDemo />
           <CommandPalette />
           {children}
+          <Toaster richColors position="top-right" />
         </TooltipProvider>
       </body>
     </html>

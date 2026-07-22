@@ -10,6 +10,8 @@ import { createBlogAction } from "@/actions/blogs";
 import { useRouter } from "next/navigation";
 import "highlight.js/styles/github-dark.css";
 
+import { toast } from "sonner";
+
 export function MarkdownEditor() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -19,7 +21,10 @@ export function MarkdownEditor() {
   const router = useRouter();
 
   const handlePublish = async () => {
-    if (!title.trim() || !content.trim()) return;
+    if (!title.trim() || !content.trim()) {
+      toast.error("Please provide both a title and content for your post.");
+      return;
+    }
     setIsSubmitting(true);
     const res = await createBlogAction({
       title,
@@ -29,9 +34,10 @@ export function MarkdownEditor() {
     setIsSubmitting(false);
 
     if (res.success && res.data) {
+      toast.success("Blog published successfully!");
       router.push(`/blogs/${res.data.slug}`);
     } else {
-      alert("Failed to publish post.");
+      toast.error("Failed to publish post.");
     }
   };
 

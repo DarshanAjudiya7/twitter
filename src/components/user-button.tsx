@@ -91,7 +91,7 @@ export function UserButton() {
         </div>
 
         <DropdownMenuItem asChild>
-          <Link href="/profile">
+          <Link href={`/profile/${user.id || "alicedev"}`}>
             <User />
             Profile
           </Link>
