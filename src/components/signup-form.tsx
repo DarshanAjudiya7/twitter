@@ -192,6 +192,13 @@ export function SignupForm() {
     }
   }
 
+  async function social(provider: "github" | "google") {
+    await authClient.signIn.social({
+      provider,
+      callbackURL: "/",
+    })
+  }
+
   return (
     <form
       onSubmit={
@@ -207,16 +214,19 @@ export function SignupForm() {
       <Input
         name="email"
         type="email"
+        placeholder="Email"
       />
 
       <Input
         name="password"
         type="password"
+        placeholder="Password"
       />
 
       <Input
         name="confirm"
         type="password"
+        placeholder="Confirm Password"
       />
 
       <Button
@@ -226,6 +236,24 @@ export function SignupForm() {
         className="w-full"
       >
         Create Account
+      </Button>
+
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={() => social("github")}
+      >
+        Continue with GitHub
+      </Button>
+
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={() => social("google")}
+      >
+        Continue with Google
       </Button>
 
       <p>
