@@ -6,7 +6,9 @@ import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { Button } from "@/components/ui/button";
 import { Image as ImageIcon, Send, Eye, Edit2 } from "lucide-react";
-import "highlight.js/styles/github-dark.css"; // Assuming dark mode mostly
+import { createBlogAction } from "@/actions/blogs";
+import { useRouter } from "next/navigation";
+import "highlight.js/styles/github-dark.css";
 
 export function MarkdownEditor() {
   const [title, setTitle] = useState("");
@@ -14,14 +16,23 @@ export function MarkdownEditor() {
   const [tags, setTags] = useState("");
   const [previewMode, setPreviewMode] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const handlePublish = async () => {
+    if (!title.trim() || !content.trim()) return;
     setIsSubmitting(true);
-    // In a real app, this would be an API call to save the blog
-    setTimeout(() => {
-      alert("Blog published successfully!");
-      setIsSubmitting(false);
-    }, 1000);
+    const res = await createBlogAction({
+      title,
+      content,
+      tags,
+    });
+    setIsSubmitting(false);
+
+    if (res.success && res.data) {
+      router.push(`/blogs/${res.data.slug}`);
+    } else {
+      alert("Failed to publish post.");
+    }
   };
 
   return (

@@ -213,4 +213,30 @@ export const notifications = pgTable("notifications", {
   link: text("link"),
   isRead: boolean("is_read").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+});
+
+export const communities = pgTable("communities", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  category: varchar("category", { length: 50 }).notNull(),
+  description: text("description"),
+  icon: text("icon"),
+  banner: text("banner"),
+  announcement: text("announcement"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const communityMembers = pgTable(
+  "community_members",
+  {
+    communityId: text("community_id").notNull().references(() => communities.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    role: varchar("role", { length: 20 }).default("member").notNull(),
+    joinedAt: timestamp("joined_at").defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.communityId, table.userId] })
+  ]
+);
+
