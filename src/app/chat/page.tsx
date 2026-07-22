@@ -1,10 +1,19 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { Hash, MessageSquare, ShieldCheck, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { channels, communities } from "@/data/community-platform";
+import { getChannels } from "@/actions/chat";
+import { getCommunities } from "@/actions/communities";
 
-export default function ChatIndexPage() {
+export default async function ChatIndexPage() {
+  const [channelsRes, communitiesRes] = await Promise.all([
+    getChannels(),
+    getCommunities(),
+  ]);
+
+  const channels = channelsRes.data || [];
+  const communities = communitiesRes.data || [];
+
   return (
     <main className="flex min-h-screen flex-1 flex-col bg-[#08090d] p-4 pt-24 text-zinc-100 md:pt-6">
       <div className="mx-auto flex h-full w-full max-w-5xl flex-1 flex-col justify-center">
@@ -21,10 +30,10 @@ export default function ChatIndexPage() {
             <Link href={`/chat/${channel.id}`} key={channel.id} className="rounded-lg border border-white/10 bg-zinc-950/80 p-5 transition hover:border-sky-400/30 hover:bg-sky-400/10">
               <div className="mb-4 flex items-center justify-between">
                 <Hash className="size-5 text-sky-300" />
-                <span className="text-xs text-zinc-500">{channel.members.toLocaleString()} members</span>
+                <span className="text-xs text-zinc-500">{(channel as any).memberCount || 0} members</span>
               </div>
               <h2 className="text-xl font-semibold text-white">#{channel.name}</h2>
-              <p className="mt-2 text-sm text-zinc-400">{channel.kind} channel with {channel.unread} unread updates.</p>
+              <p className="mt-2 text-sm text-zinc-400">{channel.type} channel. {channel.description}</p>
             </Link>
           ))}
         </div>
@@ -36,8 +45,14 @@ export default function ChatIndexPage() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-3">
-          <Button asChild className="bg-sky-300 text-slate-950 hover:bg-sky-200"><Link href="/chat/general">Open general</Link></Button>
-          <Button asChild variant="outline" className="border-white/15 bg-white/5 text-white hover:bg-white/10"><Link href="/communities">Browse {communities.length} communities</Link></Button>
+          {channels[0] && (
+            <Button asChild className="bg-sky-300 text-slate-950 hover:bg-sky-200">
+              <Link href={`/chat/${channels[0].id}`}>Open {channels[0].name}</Link>
+            </Button>
+          )}
+          <Button asChild variant="outline" className="border-white/15 bg-white/5 text-white hover:bg-white/10">
+            <Link href="/communities">Browse {communities.length} communities</Link>
+          </Button>
         </div>
       </div>
     </main>

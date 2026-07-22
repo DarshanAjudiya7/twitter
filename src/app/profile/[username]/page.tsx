@@ -9,6 +9,8 @@ interface PageProps {
   params: Promise<{ username: string }>;
 }
 
+import { FollowButton } from "@/components/interactions/FollowButton";
+
 export default async function ProfilePage({ params }: PageProps) {
   const { username } = await params;
   const res = await getUserProfile(username);
@@ -42,9 +44,7 @@ export default async function ProfilePage({ params }: PageProps) {
             </div>
             
             <div className="flex gap-3 w-full sm:w-auto">
-              <Button className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-6">
-                Follow
-              </Button>
+              <FollowButton followingId={profile.id} initialFollowing={false} className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-6" />
               <Button variant="outline" className="flex-1 sm:flex-none rounded-full px-6">
                 Message
               </Button>
@@ -76,11 +76,11 @@ export default async function ProfilePage({ params }: PageProps) {
           <div className="md:col-span-2 space-y-8">
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-white mb-1">1.2k</div>
+                <div className="text-2xl font-bold text-white mb-1">{(profile as any).followersCount || 0}</div>
                 <div className="text-xs text-zinc-500 uppercase font-semibold">Followers</div>
               </div>
               <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-white mb-1">156</div>
+                <div className="text-2xl font-bold text-white mb-1">{(profile as any).followingCount || 0}</div>
                 <div className="text-xs text-zinc-500 uppercase font-semibold">Following</div>
               </div>
               <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 text-center">

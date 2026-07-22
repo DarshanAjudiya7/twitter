@@ -6,11 +6,24 @@ import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 import { requireAuth } from "@/lib/auth-guard"
-
-import data from "./data.json"
+import { getBlogs } from "@/actions/blogs"
 
 export default async function Page() {
   await requireAuth()
+  
+  const res = await getBlogs();
+  const blogs = res.data || [];
+  
+  const dynamicData = blogs.map((b, i) => ({
+    id: i + 1,
+    header: b.title,
+    type: "Blog Post",
+    status: "Done",
+    target: String(b.readTime || 5),
+    limit: String(10),
+    reviewer: (b as any).authorName || "Alice"
+  }));
+
   return (
     <SidebarProvider
       style={
@@ -30,7 +43,7 @@ export default async function Page() {
               <div className="px-4 lg:px-6">
                 <ChartAreaInteractive />
               </div>
-              <DataTable data={data} />
+              <DataTable data={dynamicData} />
             </div>
           </div>
         </div>

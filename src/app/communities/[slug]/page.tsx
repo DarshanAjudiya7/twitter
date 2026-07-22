@@ -9,6 +9,8 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+import { JoinCommunityButton } from "@/components/interactions/JoinCommunityButton";
+
 export default async function CommunityDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const res = await getCommunityBySlug(slug);
@@ -49,12 +51,10 @@ export default async function CommunityDetailPage({ params }: PageProps) {
 
           <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-zinc-800 pt-4 md:pt-0">
             <div className="text-xs text-zinc-400">
-              <span className="font-bold text-white text-base block">1,420</span>
+              <span className="font-bold text-white text-base block">{(community as any).memberCount || 0}</span>
               Members
             </div>
-            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-6">
-              Joined
-            </Button>
+            <JoinCommunityButton communityId={community.id} initialJoined={false} className="rounded-full px-6 bg-indigo-600 hover:bg-indigo-700 text-white" />
           </div>
         </div>
 

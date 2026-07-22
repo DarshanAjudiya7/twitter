@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Users, MessageSquare, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCommunities } from "@/actions/communities";
+import { JoinCommunityButton } from "@/components/interactions/JoinCommunityButton";
 
 export default async function CommunitiesPage() {
   const res = await getCommunities();
@@ -75,16 +76,15 @@ export default async function CommunitiesPage() {
                 <div className="flex items-center gap-4 text-xs text-zinc-400 font-medium">
                   <span className="flex items-center gap-1.5">
                     <Users size={14} className="text-indigo-400" />
-                    1.4k members
+                    {(c as any).memberCount || 0} members
                   </span>
                 </div>
 
-                <Button
-                  size="sm"
-                  className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white"
-                >
-                  Join
-                </Button>
+                <JoinCommunityButton 
+                  communityId={c.id} 
+                  initialJoined={false} 
+                  className="rounded-full px-4 text-xs h-8 bg-indigo-600 hover:bg-indigo-700 text-white"
+                />
               </div>
             </div>
           ))

@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getBlogBySlug } from "@/actions/blogs";
 import { notFound } from "next/navigation";
+import { CommentForm } from "@/components/interactions/CommentForm";
+import { LikeButton } from "@/components/interactions/LikeButton";
+import { FollowButton } from "@/components/interactions/FollowButton";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -59,7 +62,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="hidden sm:flex rounded-full">Follow</Button>
+              {blog.authorId && <FollowButton followingId={blog.authorId} initialFollowing={false} className="hidden sm:flex rounded-full" />}
             </div>
           </div>
         </div>
@@ -78,10 +81,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
         {/* Action Bar */}
         <div className="flex items-center justify-between mb-8 py-2 sticky top-4 bg-background/80 backdrop-blur-md z-10 px-4 -mx-4 rounded-full border border-zinc-800 shadow-sm">
           <div className="flex items-center gap-6">
-            <button className="flex items-center gap-2 text-zinc-400 hover:text-red-400 transition-colors group">
-              <Heart className="group-hover:fill-red-400 group-hover:text-red-400" />
-              <span className="font-medium">42</span>
-            </button>
+            <LikeButton targetId={blog.id} targetType="blog" initialCount={42} initialLiked={false} />
             <button className="flex items-center gap-2 text-zinc-400 hover:text-indigo-400 transition-colors">
               <MessageSquare />
               <span className="font-medium">{blog.comments.length}</span>
@@ -106,21 +106,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
       <div className="mt-16 pt-8 border-t border-zinc-800">
         <h3 className="text-2xl font-bold mb-8">Comments ({blog.comments.length})</h3>
         
-        <div className="flex gap-4 mb-10">
-          <Avatar>
-             <AvatarFallback>ME</AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <textarea 
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-4 outline-none focus:ring-2 ring-indigo-500 resize-none text-sm"
-              placeholder="Add to the discussion..."
-              rows={3}
-            />
-            <div className="mt-2 flex justify-end">
-              <Button className="bg-indigo-600 hover:bg-indigo-700">Submit</Button>
-            </div>
-          </div>
-        </div>
+        <CommentForm blogId={blog.id} />
 
         <div className="space-y-6">
           {blog.comments.length === 0 ? (

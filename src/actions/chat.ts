@@ -2,12 +2,23 @@
 
 import { db } from "@/index";
 import * as schema from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getChannels() {
   try {
-    const list = await db.select().from(schema.channels);
+    const list = await db
+      .select({
+        id: schema.channels.id,
+        name: schema.channels.name,
+        type: schema.channels.type,
+        description: schema.channels.description,
+        memberCount: sql<number>`count(${schema.channelMembers.userId})::int`.as("memberCount"),
+      })
+      .from(schema.channels)
+      .leftJoin(schema.channelMembers, eq(schema.channels.id, schema.channelMembers.channelId))
+      .groupBy(schema.channels.id);
+      
     return { success: true, data: list };
   } catch (error) {
     console.error("Error fetching channels:", error);

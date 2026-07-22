@@ -4,6 +4,8 @@ import { db } from "@/index";
 import * as schema from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
+import { sql } from "drizzle-orm";
+
 export async function getUserProfile(idOrName: string) {
   try {
     const [foundUser] = await db
@@ -12,13 +14,28 @@ export async function getUserProfile(idOrName: string) {
       .where(eq(schema.user.id, idOrName))
       .limit(1);
 
-    if (!foundUser) {
-      // Fallback search by email prefix or return first user
-      const [fallback] = await db.select().from(schema.user).limit(1);
-      return { success: true, data: fallback || null };
-    }
+    const userToReturn = foundUser || (await db.select().from(schema.user).limit(1))[0];
+    if (!userToReturn) return { success: true, data: null };
 
-    return { success: true, data: foundUser };
+    // Fetch counts
+    const [followersResult] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(schema.follows)
+      .where(eq(schema.follows.followingId, userToReturn.id));
+
+    const [followingResult] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(schema.follows)
+      .where(eq(schema.follows.followerId, userToReturn.id));
+
+    return { 
+      success: true, 
+      data: { 
+        ...userToReturn, 
+        followersCount: followersResult.count || 0,
+        followingCount: followingResult.count || 0
+      } 
+    };
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return { success: false, data: null };

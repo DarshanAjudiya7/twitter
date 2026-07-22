@@ -1,14 +1,24 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { Command } from "cmdk";
 import { BookOpen, Hash, Search, Users, UserRound, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { channels, communities, developers, posts } from "@/data/community-platform";
+
+import { getBlogs } from "@/actions/blogs";
+import { getLeaderboardAction } from "@/actions/profile";
+import { getChannels } from "@/actions/chat";
+import { getCommunities } from "@/actions/communities";
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+
+  const [posts, setPosts] = useState<any[]>([]);
+  const [developers, setDevelopers] = useState<any[]>([]);
+  const [channels, setChannels] = useState<any[]>([]);
+  const [communities, setCommunities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
@@ -24,6 +34,24 @@ export function CommandPalette() {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
+
+  useEffect(() => {
+    if (open && posts.length === 0 && !loading) {
+      setLoading(true);
+      Promise.all([
+        getBlogs(),
+        getLeaderboardAction(),
+        getChannels(),
+        getCommunities()
+      ]).then(([blogsRes, usersRes, channelsRes, commRes]) => {
+        setPosts(blogsRes.data || []);
+        setDevelopers(usersRes.data || []);
+        setChannels(channelsRes.data || []);
+        setCommunities(commRes.data || []);
+        setLoading(false);
+      });
+    }
+  }, [open, posts.length, loading]);
 
   const go = (href: string) => {
     router.push(href);
@@ -49,7 +77,8 @@ export function CommandPalette() {
           </div>
 
           <Command.List className="max-h-[420px] overflow-y-auto p-2">
-            <Command.Empty className="py-8 text-center text-sm text-zinc-500">No results found.</Command.Empty>
+            {loading && <div className="py-8 text-center text-sm text-zinc-500">Loading...</div>}
+            {!loading && <Command.Empty className="py-8 text-center text-sm text-zinc-500">No results found.</Command.Empty>}
 
             <Command.Group heading="Blogs" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-zinc-500">
               {posts.map((post) => (
@@ -61,7 +90,7 @@ export function CommandPalette() {
 
             <Command.Group heading="Developers" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-zinc-500">
               {developers.map((developer) => (
-                <Command.Item key={developer.username} onSelect={() => go(`/profile/${developer.username}`)} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-300 transition aria-selected:bg-sky-400/10 aria-selected:text-white">
+                <Command.Item key={developer.id} onSelect={() => go(`/profile/${developer.id}`)} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-300 transition aria-selected:bg-sky-400/10 aria-selected:text-white">
                   <UserRound className="size-4" /> {developer.name}
                 </Command.Item>
               ))}
@@ -77,7 +106,7 @@ export function CommandPalette() {
 
             <Command.Group heading="Communities" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-zinc-500">
               {communities.map((community) => (
-                <Command.Item key={community.slug} onSelect={() => go("/communities")} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-300 transition aria-selected:bg-sky-400/10 aria-selected:text-white">
+                <Command.Item key={community.slug} onSelect={() => go(`/communities/${community.slug}`)} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-300 transition aria-selected:bg-sky-400/10 aria-selected:text-white">
                   <Users className="size-4" /> {community.name}
                 </Command.Item>
               ))}
