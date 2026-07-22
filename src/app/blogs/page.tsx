@@ -1,127 +1,117 @@
-import Link from "next/link";
-import { Clock, MessageSquare, Heart, BookmarkPlus } from "lucide-react";
+﻿import Link from "next/link";
+import { BookmarkPlus, Clock, Heart, MessageSquare, PenLine, Search, Sparkles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { communities, posts } from "@/data/community-platform";
 
-const MOCK_BLOGS = [
-  {
-    slug: "getting-started-with-nextjs-14",
-    title: "Getting Started with Next.js 14 and Server Actions",
-    excerpt: "Learn how to build full-stack applications without writing a single API route using the new Server Actions in Next.js 14...",
-    author: "Alice Developer",
-    date: "Oct 24, 2023",
-    readTime: "5 min read",
-    likes: 128,
-    comments: 32,
-    tags: ["nextjs", "react", "tutorial"],
-    coverImage: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800"
-  },
-  {
-    slug: "understanding-react-server-components",
-    title: "Understanding React Server Components (RSC)",
-    excerpt: "A deep dive into how RSCs work under the hood and why they are a game changer for React performance and architecture.",
-    author: "Bob Engineer",
-    date: "Nov 2, 2023",
-    readTime: "8 min read",
-    likes: 256,
-    comments: 45,
-    tags: ["react", "performance", "architecture"],
-    coverImage: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=800"
-  }
-];
+const filters = ["Latest", "Trending", "Most liked", "Most commented", "Featured"];
+const tags = ["nextjs", "react", "ai", "agents", "devops", "python", "typescript", "security"];
 
 export default function BlogsPage() {
   return (
-    <div className="container max-w-5xl mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Developer Blogs</h1>
-          <p className="text-muted-foreground mt-2">Discover technical articles, tutorials, and insights.</p>
-        </div>
-        <Link href="/blogs/new">
-          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">Write a Post</Button>
-        </Link>
-      </div>
-
-      <div className="flex gap-8">
-        <div className="w-64 hidden md:block shrink-0 space-y-6">
+    <main className="min-h-screen bg-[#08090d] px-4 pb-12 pt-24 text-zinc-100 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <header className="mb-8 flex flex-col gap-5 border-b border-white/10 pb-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h3 className="font-semibold mb-3">Categories</h3>
-            <ul className="space-y-2 text-sm text-zinc-400">
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">🔥 Trending</li>
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">✨ Latest</li>
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">❤️ Most Liked</li>
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">🔖 Bookmarks</li>
-            </ul>
+            <Badge variant="outline" className="mb-4 border-emerald-400/30 bg-emerald-400/10 text-emerald-200">
+              Publishing hub
+            </Badge>
+            <h1 className="text-4xl font-semibold tracking-normal text-white sm:text-5xl">Developer Blogs</h1>
+            <p className="mt-3 max-w-2xl text-zinc-400">
+              Technical essays, tutorials, series, code walkthroughs, and community knowledge with Markdown-first authoring.
+            </p>
           </div>
-          <div>
-            <h3 className="font-semibold mb-3">Popular Tags</h3>
-            <div className="flex flex-wrap gap-2">
-              {["react", "nextjs", "typescript", "tailwindcss", "backend"].map(tag => (
-                <span key={tag} className="px-2 py-1 bg-zinc-800 text-zinc-300 text-xs rounded-md cursor-pointer hover:bg-zinc-700">
-                  #{tag}
-                </span>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild variant="outline" className="border-white/15 bg-white/5 text-white hover:bg-white/10">
+              <Link href="/explore"><Search /> Search posts</Link>
+            </Button>
+            <Button asChild className="bg-emerald-300 text-emerald-950 hover:bg-emerald-200">
+              <Link href="/blogs/new"><PenLine /> Write a post</Link>
+            </Button>
           </div>
-        </div>
+        </header>
 
-        <div className="flex-1 space-y-8">
-          {MOCK_BLOGS.map((blog) => (
-            <div key={blog.slug} className="group flex flex-col sm:flex-row gap-6 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors">
-              <div className="sm:w-1/3 aspect-video sm:aspect-square md:aspect-[4/3] rounded-lg overflow-hidden shrink-0">
-                <img 
-                  src={blog.coverImage} 
-                  alt={blog.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+        <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="space-y-4 lg:sticky lg:top-24 lg:h-fit">
+            <div className="rounded-lg border border-white/10 bg-zinc-950/80 p-4">
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Filters</h2>
+              <div className="space-y-1">
+                {filters.map((filter) => (
+                  <button key={filter} className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm text-zinc-300 transition hover:bg-white/[0.05] hover:text-white">
+                    {filter}
+                    {filter === "Trending" ? <Sparkles className="size-4 text-amber-300" /> : null}
+                  </button>
+                ))}
               </div>
-              
-              <div className="flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 text-xs text-zinc-400 mb-2">
-                    <span className="font-medium text-zinc-300">{blog.author}</span>
-                    <span>•</span>
+            </div>
+
+            <div className="rounded-lg border border-white/10 bg-zinc-950/80 p-4">
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Popular tags</h2>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <Badge key={tag} variant="outline" className="border-white/10 bg-white/[0.03] text-zinc-300">
+                    #{tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-white/10 bg-zinc-950/80 p-4">
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">Community journals</h2>
+              <div className="space-y-2">
+                {communities.map((community) => (
+                  <Link href="/communities" key={community.slug} className="flex items-center justify-between rounded-md px-2 py-2 text-sm transition hover:bg-white/[0.04]">
+                    <span className="text-zinc-200">{community.name}</span>
+                    <span className="text-xs text-zinc-500">{community.posts}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          <section className="space-y-5">
+            {posts.map((blog) => (
+              <article key={blog.slug} className="group grid overflow-hidden rounded-lg border border-white/10 bg-zinc-950/80 transition hover:border-sky-400/30 md:grid-cols-[280px_minmax(0,1fr)]">
+                <Link href={`/blogs/${blog.slug}`} className="block min-h-56 overflow-hidden bg-zinc-900">
+                  <img src={blog.cover} alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+                </Link>
+                <div className="flex flex-col p-5">
+                  <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                    <Badge variant="outline" className="border-sky-400/25 bg-sky-400/10 text-sky-200">
+                      {blog.community}
+                    </Badge>
                     <span>{blog.date}</span>
+                    <span>{blog.readTime}</span>
+                    {blog.featured ? <span className="text-amber-300">Featured</span> : null}
                   </div>
                   <Link href={`/blogs/${blog.slug}`}>
-                    <h2 className="text-xl font-bold mb-2 group-hover:text-indigo-400 transition-colors">
+                    <h2 className="text-2xl font-semibold leading-tight text-white transition group-hover:text-sky-200">
                       {blog.title}
                     </h2>
                   </Link>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {blog.tags.map(tag => (
-                      <span key={tag} className="text-xs text-indigo-400 font-medium">#{tag}</span>
+                  <p className="mt-3 text-sm leading-6 text-zinc-400">{blog.excerpt}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {blog.tags.map((tag) => (
+                      <span key={tag} className="text-xs font-medium text-zinc-500">#{tag}</span>
                     ))}
                   </div>
-                  <p className="text-sm text-zinc-400 line-clamp-2 mb-4">
-                    {blog.excerpt}
-                  </p>
-                </div>
-                
-                <div className="flex items-center justify-between mt-auto pt-4 border-t border-zinc-800/50">
-                  <div className="flex items-center gap-4 text-sm text-zinc-400">
-                    <span className="flex items-center gap-1.5 hover:text-red-400 cursor-pointer transition-colors">
-                      <Heart size={16} /> {blog.likes}
-                    </span>
-                    <span className="flex items-center gap-1.5 hover:text-indigo-400 cursor-pointer transition-colors">
-                      <MessageSquare size={16} /> {blog.comments}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 text-sm text-zinc-400">
-                    <span className="flex items-center gap-1.5 hidden sm:flex">
-                      <Clock size={16} /> {blog.readTime}
-                    </span>
-                    <button className="hover:text-zinc-200 transition-colors" title="Bookmark">
-                      <BookmarkPlus size={18} />
-                    </button>
+                  <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4 text-sm text-zinc-500">
+                    <Link href={`/profile/${blog.author.username}`} className="font-medium text-zinc-300 hover:text-white">
+                      {blog.author.name}
+                    </Link>
+                    <div className="flex items-center gap-4">
+                      <span className="flex items-center gap-1"><Heart className="size-4" /> {blog.likes}</span>
+                      <span className="flex items-center gap-1"><MessageSquare className="size-4" /> {blog.comments}</span>
+                      <span className="flex items-center gap-1"><Clock className="size-4" /> {blog.views}</span>
+                      <button aria-label="Bookmark post" className="transition hover:text-white"><BookmarkPlus className="size-4" /></button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              </article>
+            ))}
+          </section>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

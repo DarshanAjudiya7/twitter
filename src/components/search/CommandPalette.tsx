@@ -1,20 +1,23 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { Command } from "cmdk";
-import { Search, FileText, User, Hash, Calculator } from "lucide-react";
+import { BookOpen, Hash, Search, Users, UserRound, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { channels, communities, developers, posts } from "@/data/community-platform";
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  // Toggle the menu when ⌘K is pressed
   useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setOpen((open) => !open);
+    const down = (event: KeyboardEvent) => {
+      if (event.key === "k" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        setOpen((current) => !current);
+      }
+      if (event.key === "Escape") {
+        setOpen(false);
       }
     };
 
@@ -22,60 +25,62 @@ export function CommandPalette() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
+  const go = (href: string) => {
+    router.push(href);
+    setOpen(false);
+  };
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start justify-center pt-[15vh]">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <Command label="Global Command Menu" shouldFilter={true} className="flex flex-col">
-          <div className="flex items-center border-b border-zinc-800 px-3">
-            <Search className="text-zinc-500 shrink-0" size={20} />
-            <Command.Input 
-              placeholder="Search developers, blogs, or channels..." 
-              className="flex-1 bg-transparent text-white placeholder:text-zinc-500 px-3 py-4 outline-none border-none text-base font-medium"
+    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/60 px-4 pt-[12vh] backdrop-blur-sm">
+      <div className="w-full max-w-2xl overflow-hidden rounded-lg border border-white/10 bg-zinc-950 shadow-2xl shadow-black/40">
+        <Command label="Global Command Menu" shouldFilter className="flex flex-col">
+          <div className="flex items-center border-b border-white/10 px-3">
+            <Search className="size-5 shrink-0 text-zinc-500" />
+            <Command.Input
+              placeholder="Search developers, blogs, communities, channels..."
+              className="flex-1 border-none bg-transparent px-3 py-4 text-base font-medium text-white outline-none placeholder:text-zinc-600"
               autoFocus
             />
-            <button 
-              onClick={() => setOpen(false)}
-              className="text-xs bg-zinc-800 text-zinc-400 px-2 py-1 rounded-md cursor-pointer hover:bg-zinc-700 hover:text-zinc-200 transition-colors"
-            >
-              ESC
+            <button onClick={() => setOpen(false)} aria-label="Close command palette" className="rounded-md p-2 text-zinc-500 transition hover:bg-white/10 hover:text-white">
+              <X className="size-4" />
             </button>
           </div>
 
-          <Command.List className="max-h-[300px] overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-zinc-700">
-            <Command.Empty className="py-6 text-center text-zinc-500 text-sm">
-              No results found.
-            </Command.Empty>
+          <Command.List className="max-h-[420px] overflow-y-auto p-2">
+            <Command.Empty className="py-8 text-center text-sm text-zinc-500">No results found.</Command.Empty>
 
-            <Command.Group heading="Blogs" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-zinc-500 mb-2">
-              <Command.Item 
-                onSelect={() => { router.push('/blogs/getting-started-with-nextjs-14'); setOpen(false); }}
-                className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-300 rounded-lg cursor-pointer aria-selected:bg-indigo-600 aria-selected:text-white transition-colors"
-              >
-                <FileText size={16} />
-                Getting Started with Next.js 14 and Server Actions
-              </Command.Item>
+            <Command.Group heading="Blogs" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-zinc-500">
+              {posts.map((post) => (
+                <Command.Item key={post.slug} onSelect={() => go(`/blogs/${post.slug}`)} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-300 transition aria-selected:bg-sky-400/10 aria-selected:text-white">
+                  <BookOpen className="size-4" /> {post.title}
+                </Command.Item>
+              ))}
             </Command.Group>
 
-            <Command.Group heading="Developers" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-zinc-500 mb-2">
-              <Command.Item 
-                onSelect={() => { router.push('/profile/alicedev'); setOpen(false); }}
-                className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-300 rounded-lg cursor-pointer aria-selected:bg-indigo-600 aria-selected:text-white transition-colors"
-              >
-                <User size={16} />
-                Alice Developer
-              </Command.Item>
+            <Command.Group heading="Developers" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-zinc-500">
+              {developers.map((developer) => (
+                <Command.Item key={developer.username} onSelect={() => go(`/profile/${developer.username}`)} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-300 transition aria-selected:bg-sky-400/10 aria-selected:text-white">
+                  <UserRound className="size-4" /> {developer.name}
+                </Command.Item>
+              ))}
             </Command.Group>
 
-            <Command.Group heading="Channels" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-zinc-500">
-              <Command.Item 
-                onSelect={() => { router.push('/chat/frontend'); setOpen(false); }}
-                className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-300 rounded-lg cursor-pointer aria-selected:bg-indigo-600 aria-selected:text-white transition-colors"
-              >
-                <Hash size={16} />
-                frontend
-              </Command.Item>
+            <Command.Group heading="Channels" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-zinc-500">
+              {channels.map((channel) => (
+                <Command.Item key={channel.id} onSelect={() => go(`/chat/${channel.id}`)} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-300 transition aria-selected:bg-sky-400/10 aria-selected:text-white">
+                  <Hash className="size-4" /> {channel.name}
+                </Command.Item>
+              ))}
+            </Command.Group>
+
+            <Command.Group heading="Communities" className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-zinc-500">
+              {communities.map((community) => (
+                <Command.Item key={community.slug} onSelect={() => go("/communities")} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-300 transition aria-selected:bg-sky-400/10 aria-selected:text-white">
+                  <Users className="size-4" /> {community.name}
+                </Command.Item>
+              ))}
             </Command.Group>
           </Command.List>
         </Command>

@@ -1,171 +1,145 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
-import { ArrowLeft, Clock, MessageSquare, Heart, BookmarkPlus, Share2, MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, BookmarkPlus, Clapperboard, Clock, Heart, MessageSquare, MoreHorizontal, Share2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { getPostBySlug } from "@/data/community-platform";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 const SAMPLE_CONTENT = `
-## Introduction
-Next.js 14 brings a paradigm shift to how we write React applications. With the stabilization of Server Actions, you can now write mutations directly in your server components without manually creating API endpoints.
+## Why this matters
 
-### What are Server Actions?
-Server Actions are asynchronous functions that run on the server. They can be called directly from your client components or server components to handle form submissions and data mutations.
+Large developer platforms need publishing, discussion, and collaboration to feel connected. The hard part is deciding which data should be instant, which data should be cached, and which interactions deserve optimistic UI.
+
+### A practical boundary checklist
+
+- Keep profile, article, and community summary data server-rendered when possible.
+- Move composer controls, reactions, editor previews, and live chat into small Client Components.
+- Use cursor pagination for feeds, messages, notifications, and follower lists.
+- Cache public discovery pages, but revalidate author dashboards and notification counters more aggressively.
 
 \`\`\`typescript
-// app/actions.ts
-'use server'
- 
-export async function createPost(formData: FormData) {
-  const title = formData.get('title')
-  const content = formData.get('content')
-  
-  // Mutate data
-  await db.insert(posts).values({ title, content })
-  
-  // Revalidate cache
-  revalidatePath('/posts')
-}
+export type CommunityEvent = {
+  id: string;
+  actorId: string;
+  targetId: string;
+  type: "post.published" | "comment.created" | "message.sent";
+  createdAt: Date;
+};
 \`\`\`
 
-### Why is this important?
-1. **Less Boilerplate**: No need to create \`/api/posts/route.ts\`
-2. **Type Safety**: End-to-end type safety without extra configuration
-3. **Progressive Enhancement**: Forms work even before JavaScript loads
+> Strong community systems make the useful path easy and the harmful path auditable.
 
-## Conclusion
-The future of full-stack React is here, and it's incredibly productive. What are your thoughts on Server Actions? Let me know in the comments below!
+## Production notes
+
+A production implementation should connect these surfaces to persistent models for posts, comments, channels, reports, badges, and notifications. It should also add rate limits, input validation, upload scanning, moderation queues, audit logs, and observability around the real-time layer.
 `;
 
 export default async function BlogDetailPage({ params }: PageProps) {
   const { slug } = await params;
+  const post = getPostBySlug(slug);
 
   return (
-    <div className="container max-w-3xl mx-auto py-8 px-4">
-      <Link href="/blogs" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors mb-8">
-        <ArrowLeft size={16} /> Back to Blogs
-      </Link>
+    <main className="min-h-screen bg-[#08090d] px-4 pb-16 pt-24 text-zinc-100 sm:px-6 lg:px-8">
+      <article className="mx-auto max-w-4xl">
+        <Link href="/blogs" className="mb-8 inline-flex items-center gap-2 text-sm text-zinc-400 transition hover:text-zinc-100">
+          <ArrowLeft className="size-4" /> Back to blogs
+        </Link>
 
-      <article>
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-2 mb-4">
-            {["nextjs", "react", "tutorial"].map(tag => (
-              <span key={tag} className="text-xs text-indigo-400 font-medium">#{tag}</span>
+        <header className="mb-8">
+          <div className="mb-4 flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <Badge key={tag} variant="outline" className="border-sky-400/25 bg-sky-400/10 text-sky-200">
+                #{tag}
+              </Badge>
             ))}
           </div>
-          
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6 leading-tight">
-            Getting Started with Next.js 14 and Server Actions
+          <h1 className="text-4xl font-semibold leading-tight tracking-normal text-white sm:text-5xl">
+            {post.title}
           </h1>
+          <p className="mt-4 text-lg leading-8 text-zinc-400">{post.excerpt}</p>
 
-          <div className="flex items-center justify-between py-6 border-y border-zinc-800">
-            <div className="flex items-center gap-3">
-              <Avatar className="w-12 h-12">
-                <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alice" alt="Author" />
-                <AvatarFallback>AD</AvatarFallback>
+          <div className="mt-7 flex flex-col gap-4 border-y border-white/10 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <Link href={`/profile/${post.author.username}`} className="flex items-center gap-3">
+              <Avatar className="size-12">
+                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${post.author.avatarSeed}`} alt={post.author.name} />
+                <AvatarFallback>{post.author.name.slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div>
-                <div className="font-semibold">Alice Developer</div>
-                <div className="text-sm text-zinc-400 flex items-center gap-2">
-                  <span>Oct 24, 2023</span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1"><Clock size={14} /> 5 min read</span>
+                <div className="font-semibold text-white">{post.author.name}</div>
+                <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
+                  <span>{post.date}</span>
+                  <span>{post.readTime}</span>
+                  <span>{post.views} reads</span>
                 </div>
               </div>
-            </div>
+            </Link>
+            <Button variant="outline" className="border-white/15 bg-white/5 text-white hover:bg-white/10">Follow author</Button>
+          </div>
+        </header>
 
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="hidden sm:flex rounded-full">Follow</Button>
-            </div>
+        <div className="mb-8 overflow-hidden rounded-lg border border-white/10 bg-zinc-950">
+          <img src={post.cover} alt="" className="aspect-video w-full object-cover" />
+        </div>
+
+        <div className="sticky top-20 z-20 mb-8 flex items-center justify-between rounded-lg border border-white/10 bg-zinc-950/90 px-4 py-3 backdrop-blur">
+          <div className="flex items-center gap-5 text-sm text-zinc-400">
+            <button className="flex items-center gap-2 transition hover:text-rose-300"><Heart className="size-4" /> {post.likes}</button>
+            <button className="flex items-center gap-2 transition hover:text-amber-300"><Clapperboard className="size-4" /> {post.claps}</button>
+            <button className="flex items-center gap-2 transition hover:text-sky-300"><MessageSquare className="size-4" /> {post.comments}</button>
+          </div>
+          <div className="flex items-center gap-3 text-zinc-400">
+            <button aria-label="Bookmark" className="transition hover:text-white"><BookmarkPlus className="size-4" /></button>
+            <button aria-label="Share" className="transition hover:text-white"><Share2 className="size-4" /></button>
+            <button aria-label="More actions" className="transition hover:text-white"><MoreHorizontal className="size-4" /></button>
           </div>
         </div>
 
-        {/* Cover Image */}
-        <div className="aspect-video w-full rounded-xl overflow-hidden mb-10 border border-zinc-800">
-          <img 
-            src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1200" 
-            alt="Cover"
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* Action Bar */}
-        <div className="flex items-center justify-between mb-8 py-2 sticky top-4 bg-background/80 backdrop-blur-md z-10 px-4 -mx-4 rounded-full border border-zinc-800 shadow-sm">
-          <div className="flex items-center gap-6">
-            <button className="flex items-center gap-2 text-zinc-400 hover:text-red-400 transition-colors group">
-              <Heart className="group-hover:fill-red-400 group-hover:text-red-400" />
-              <span className="font-medium">128</span>
-            </button>
-            <button className="flex items-center gap-2 text-zinc-400 hover:text-indigo-400 transition-colors">
-              <MessageSquare />
-              <span className="font-medium">32</span>
-            </button>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="text-zinc-400 hover:text-zinc-200 transition-colors"><BookmarkPlus /></button>
-            <button className="text-zinc-400 hover:text-zinc-200 transition-colors"><Share2 /></button>
-            <button className="text-zinc-400 hover:text-zinc-200 transition-colors"><MoreHorizontal /></button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="prose prose-invert prose-indigo prose-lg max-w-none">
+        <div className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-a:text-sky-300 prose-code:text-emerald-200">
           <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
             {SAMPLE_CONTENT}
           </ReactMarkdown>
         </div>
-      </article>
 
-      {/* Comments Section */}
-      <div className="mt-16 pt-8 border-t border-zinc-800">
-        <h3 className="text-2xl font-bold mb-8">Comments (32)</h3>
-        
-        <div className="flex gap-4 mb-10">
-          <Avatar>
-             <AvatarFallback>ME</AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <textarea 
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-4 outline-none focus:ring-2 ring-indigo-500 resize-none"
-              placeholder="Add to the discussion..."
-              rows={3}
-            />
-            <div className="mt-2 flex justify-end">
-              <Button className="bg-indigo-600 hover:bg-indigo-700">Submit</Button>
+        <section className="mt-14 border-t border-white/10 pt-8">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-2xl font-semibold text-white">Discussion</h2>
+            <span className="flex items-center gap-1 text-sm text-zinc-500"><Clock className="size-4" /> Active now</span>
+          </div>
+          <div className="mb-8 flex gap-3">
+            <Avatar><AvatarFallback>ME</AvatarFallback></Avatar>
+            <div className="flex-1">
+              <textarea className="min-h-28 w-full resize-none rounded-lg border border-white/10 bg-zinc-950 p-4 text-sm outline-none ring-sky-400/40 placeholder:text-zinc-600 focus:ring-2" placeholder="Add a thoughtful comment, code example, or follow-up question..." />
+              <div className="mt-3 flex justify-end">
+                <Button className="bg-sky-300 text-slate-950 hover:bg-sky-200">Comment</Button>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="space-y-6">
-          {/* Sample Comment */}
-          <div className="flex gap-4">
-            <Avatar>
-               <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Bob" />
-               <AvatarFallback>BE</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 bg-zinc-900 p-4 rounded-lg rounded-tl-none border border-zinc-800">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-semibold text-sm">Bob Engineer</span>
-                <span className="text-xs text-zinc-500">2 days ago</span>
+          <div className="space-y-4">
+            <div className="rounded-lg border border-white/10 bg-zinc-950/80 p-4">
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="font-semibold text-white">Maya Kapoor</span>
+                <span className="text-zinc-600">12 min ago</span>
               </div>
-              <p className="text-zinc-300 text-sm">
-                This is a game changer! I've been waiting for Server Actions to stabilize before migrating my team's project. The reduction in boilerplate alone makes it worth it.
+              <p className="text-sm leading-6 text-zinc-400">
+                The cache boundary checklist is the part I wish every architecture doc included. It makes review conversations much easier.
               </p>
-              <div className="mt-4 flex items-center gap-4 text-xs text-zinc-500 font-medium">
-                <button className="hover:text-zinc-300 transition-colors">Like (12)</button>
-                <button className="hover:text-zinc-300 transition-colors">Reply</button>
+              <div className="mt-3 flex gap-4 text-xs font-medium text-zinc-500">
+                <button className="hover:text-white">Upvote (18)</button>
+                <button className="hover:text-white">Reply</button>
+                <button className="hover:text-white">Report</button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </section>
+      </article>
+    </main>
   );
 }

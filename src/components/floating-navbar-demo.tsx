@@ -1,7 +1,19 @@
 "use client";
+
 import React from "react";
 import { FloatingNav } from "@/components/ui/floating-navbar";
-import { IconHome, IconMessage, IconUser, IconBrandHipchat, IconBook, IconUserCircle } from "@tabler/icons-react";
+import {
+  IconBell,
+  IconBook,
+  IconBrandHipchat,
+  IconHome,
+  IconSearch,
+  IconUsersGroup,
+  IconUserCircle,
+  IconTrophy,
+  IconChartBar,
+} from "@tabler/icons-react";
+
 export default function FloatingNavDemo() {
   const navItems = [
     {
@@ -20,21 +32,30 @@ export default function FloatingNavDemo() {
       icon: <IconBook className="h-4 w-4 text-neutral-500 dark:text-white" />,
     },
     {
+      name: "Communities",
+      link: "/communities",
+      icon: <IconUsersGroup className="h-4 w-4 text-neutral-500 dark:text-white" />,
+    },
+    {
+      name: "Leaderboard",
+      link: "/leaderboard",
+      icon: <IconTrophy className="h-4 w-4 text-neutral-500 dark:text-white" />,
+    },
+    {
+      name: "Analytics",
+      link: "/analytics",
+      icon: <IconChartBar className="h-4 w-4 text-neutral-500 dark:text-white" />,
+    },
+    {
       name: "Profile",
       link: "/profile/alicedev",
       icon: <IconUserCircle className="h-4 w-4 text-neutral-500 dark:text-white" />,
     },
   ];
+
   return (
-    <div className="relative w-full translate-z-1">
+    <div className="relative z-50 w-full">
       <FloatingNav navItems={navItems} />
-      <DummyContent />
     </div>
   );
 }
-const DummyContent = () => {
-  return (
-
-      <div className="bg-grid-black/[0.1] dark:bg-grid-white/[0.2] absolute inset-0" />
-  );
-};

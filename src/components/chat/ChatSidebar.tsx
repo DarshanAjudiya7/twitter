@@ -1,81 +1,90 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Hash, MessageSquare, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Bell, Hash, Lock, MessageSquare, Plus, Radio, Shield } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-
-// Mock data until we connect to DB
-const MOCK_CHANNELS = [
-  { id: "general", name: "general" },
-  { id: "frontend", name: "frontend" },
-  { id: "backend", name: "backend" },
-  { id: "ai", name: "ai" }
-];
+import { channels, communities, directMessages } from "@/data/community-platform";
 
 export function ChatSidebar() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
   return (
-    <div className="w-64 bg-zinc-950 text-zinc-300 flex flex-col h-full border-r border-zinc-800">
-      <div className="p-4 flex items-center justify-between shadow-sm">
-        <h2 className="font-bold text-lg text-white">Dev Community</h2>
+    <aside className="hidden h-screen w-72 shrink-0 flex-col border-r border-white/10 bg-zinc-950 text-zinc-300 md:flex">
+      <div className="p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-white">DevCircle</h2>
+            <p className="text-xs text-zinc-500">Developer community</p>
+          </div>
+          <button aria-label="Create" className="rounded-md border border-white/10 bg-white/[0.04] p-2 transition hover:bg-white/10">
+            <Plus className="size-4" />
+          </button>
+        </div>
       </div>
-      <Separator className="bg-zinc-800" />
-      
-      <div className="flex-1 overflow-y-auto p-3 space-y-6">
-        <div>
-          <div className="flex items-center justify-between mb-2 px-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-            <span>Channels</span>
-            <button className="hover:text-zinc-300"><Plus size={14} /></button>
+      <Separator className="bg-white/10" />
+
+      <div className="flex-1 space-y-6 overflow-y-auto p-3">
+        <section>
+          <div className="mb-2 flex items-center justify-between px-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+            <span>Communities</span>
+            <Shield className="size-3.5" />
           </div>
           <div className="space-y-1">
-            {MOCK_CHANNELS.map((channel) => (
-              <Link key={channel.id} href={`/chat/${channel.id}`}>
-                <div className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-zinc-800/50 cursor-pointer text-sm transition-colors group">
-                  <Hash size={18} className="text-zinc-500 group-hover:text-zinc-300" />
-                  <span className="font-medium text-zinc-400 group-hover:text-zinc-200">{channel.name}</span>
-                </div>
+            {communities.map((community) => (
+              <Link key={community.slug} href="/communities" className="flex items-center justify-between rounded-md px-2 py-2 text-sm transition hover:bg-white/[0.05] hover:text-white">
+                <span className="truncate">{community.name}</span>
+                <span className="text-xs text-zinc-600">{community.online}</span>
               </Link>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div>
-          <div className="flex items-center justify-between mb-2 px-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-            <span>Direct Messages</span>
-            <button className="hover:text-zinc-300"><Plus size={14} /></button>
+        <section>
+          <div className="mb-2 flex items-center justify-between px-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+            <span>Channels</span>
+            <Plus className="size-3.5" />
           </div>
           <div className="space-y-1">
-            {/* Mock DMs */}
-            <Link href={`/chat/dm-1`}>
-              <div className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-zinc-800/50 cursor-pointer text-sm transition-colors group">
-                <MessageSquare size={16} className="text-zinc-500 group-hover:text-zinc-300" />
-                <span className="font-medium text-zinc-400 group-hover:text-zinc-200">Jane Doe</span>
-              </div>
-            </Link>
+            {channels.map((channel) => (
+              <Link key={channel.id} href={`/chat/${channel.id}`} className="group flex items-center justify-between rounded-md px-2 py-2 text-sm transition hover:bg-white/[0.05] hover:text-white">
+                <span className="flex min-w-0 items-center gap-2">
+                  {channel.kind === "Invite" ? <Lock className="size-4 text-zinc-500" /> : channel.kind === "Read-only" ? <Bell className="size-4 text-zinc-500" /> : <Hash className="size-4 text-zinc-500" />}
+                  <span className="truncate">{channel.name}</span>
+                </span>
+                {channel.unread ? <Badge variant="outline" className="h-5 border-sky-400/20 bg-sky-400/10 text-sky-200">{channel.unread}</Badge> : null}
+              </Link>
+            ))}
           </div>
+        </section>
+
+        <section>
+          <div className="mb-2 flex items-center justify-between px-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+            <span>Direct messages</span>
+            <Plus className="size-3.5" />
+          </div>
+          <div className="space-y-1">
+            {directMessages.map((dm) => (
+              <Link key={dm.id} href={`/chat/${dm.id}`} className="flex items-center justify-between rounded-md px-2 py-2 text-sm transition hover:bg-white/[0.05] hover:text-white">
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className={`size-2 rounded-full ${dm.status === "online" ? "bg-emerald-400" : dm.status === "typing" ? "bg-sky-400" : "bg-amber-400"}`} />
+                  <span className="truncate">{dm.name}</span>
+                </span>
+                {dm.unread ? <span className="text-xs text-sky-300">{dm.unread}</span> : null}
+              </Link>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <div className="border-t border-white/10 bg-black/30 p-3">
+        <div className="flex items-center gap-3">
+          <div className="flex size-9 items-center justify-center rounded-md bg-sky-300 font-semibold text-slate-950">ME</div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-semibold text-white">My Username</div>
+            <div className="flex items-center gap-1 text-xs text-emerald-300"><Radio className="size-3" /> Online</div>
+          </div>
+          <MessageSquare className="size-4 text-zinc-500" />
         </div>
       </div>
-      
-      <div className="p-3 bg-zinc-900 border-t border-zinc-800 mt-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs">
-            ME
-          </div>
-          <div className="flex-1 min-w-0 text-sm">
-            <div className="font-medium text-white truncate">My Username</div>
-            <div className="text-xs text-zinc-500 truncate">Online</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </aside>
   );
 }
