@@ -1,4 +1,5 @@
-import { MapPin, Link as LinkIcon, Twitter, Github, Linkedin, Briefcase, Calendar, Award } from "lucide-react";
+import { MapPin, Link as LinkIcon, Briefcase, Calendar, Award } from "lucide-react";
+import { IconBrandGithub, IconBrandTwitter, IconBrandLinkedin } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
@@ -82,10 +83,10 @@ export default async function ProfilePage({ params }: PageProps) {
                   <LinkIcon size={18} /> {MOCK_PROFILE.website.replace('https://', '')}
                 </a>
                 <a href="#" className="flex items-center gap-3 text-zinc-300 hover:text-indigo-400 transition-colors">
-                  <Github size={18} /> {MOCK_PROFILE.github}
+                  <IconBrandGithub size={18} /> {MOCK_PROFILE.github}
                 </a>
                 <a href="#" className="flex items-center gap-3 text-zinc-300 hover:text-indigo-400 transition-colors">
-                  <Twitter size={18} /> {MOCK_PROFILE.twitter}
+                  <IconBrandTwitter size={18} /> {MOCK_PROFILE.twitter}
                 </a>
               </div>
             </div>
@@ -123,7 +124,7 @@ export default async function ProfilePage({ params }: PageProps) {
               <h3 className="font-semibold text-sm text-zinc-500 uppercase tracking-wider mb-4">Badges</h3>
               <div className="flex gap-4">
                 {MOCK_PROFILE.badges.map(badge => (
-                  <div key={badge.name} className={\`\${badge.color} px-4 py-2 rounded-lg flex items-center gap-2 border border-current/20\`}>
+                  <div key={badge.name} className={`${badge.color} px-4 py-2 rounded-lg flex items-center gap-2 border border-current/20`}>
                     <span className="text-lg">{badge.icon}</span>
                     <span className="font-medium text-sm">{badge.name}</span>
                   </div>
